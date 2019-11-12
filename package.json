@@ -3,6 +3,7 @@
   "version": "3.5.0",
   "description": "Pan and zoom events for any element",
   "main": "no-browser.js",
+  "typings": "pan-zoom.d.ts",
   "browser": "index.js",
   "scripts": {
     "test": "budo test.js"
