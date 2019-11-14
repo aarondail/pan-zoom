@@ -27,7 +27,12 @@ function panZoom (target, cb) {
 
 	//enable panning
 	var touch = position.emitter({
-		element: target
+		element: target,
+		// Default value before the any mouse/touch events are triggered. We set
+		// // this so we can discern one specific scenario when processing wheel
+		// // events. Otherwise if we don't set this the default value will be
+		// [0,0].
+		position: [undefined, undefined]
 	})
 
 	var impetus
@@ -88,13 +93,29 @@ function panZoom (target, cb) {
 	//enable zooming
 	var wheelListener = wheel(target, function (dx, dy, dz, e) {
 		if (!isPassive) e.preventDefault()
+
+		let x = touch.position[0]
+		let y = touch.position[1]
+
+		// For the very first wheel event, if the user hasn't made a mouse move
+		// or anything, then touch.position will be [undefined, undefined]. This
+		// is because the touch-position library only changes the default
+		// position once a mouse or touch event has happened. To work around
+		// this case here, we manually compute the current pointer location
+		// based off the incoming WheelEvent.
+		if (x === undefined || y === undefined) {
+			const boundingRect = target.getBoundingClientRect();
+			x = e.clientX - boundingRect.left;
+			y = e.clientY - boundingRect.top;
+		}
+
 		schedule({
 			srcElement: e.srcElement,
 			target: target,
 			type: 'mouse',
 			dx: 0, dy: 0, dz: dy,
-			x: touch.position[0], y: touch.position[1],
-			x0: touch.position[0], y0: touch.position[1]
+			x: x, y: y,
+			x0: x, y0: y
 		})
 	})
 
