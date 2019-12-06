@@ -16,7 +16,6 @@ var hasPassive = require('has-passive-events')
 
 module.exports = panZoom
 
-
 function panZoom (target, cb) {
 	if (target instanceof Function) {
 		cb = target
@@ -104,7 +103,7 @@ function panZoom (target, cb) {
 		// this case here, we manually compute the current pointer location
 		// based off the incoming WheelEvent.
 		if (x === undefined || y === undefined) {
-			const boundingRect = target.getBoundingClientRect();
+			var boundingRect = target.getBoundingClientRect();
 			x = e.clientX - boundingRect.left;
 			y = e.clientY - boundingRect.top;
 		}
@@ -126,7 +125,7 @@ function panZoom (target, cb) {
 	// Safari the touch-pinch library doesn't handle pinching and zooming (it
 	// does seem to work for mobile safari though). It does seem to work on
 	// mobile Safari though (if we suppress these events).
-	var hasTouchEvents = typeof Touch !== 'undefined';
+	var hasTouchEvents = typeof Touch !== 'undefined'; // Note that this will be true for Desktop Chrome too, which is sad
 	var safariGestureEventHandlingState;
 	function handleGestureStartForSafari(e) {
 		e.preventDefault();
@@ -175,6 +174,22 @@ function panZoom (target, cb) {
 		target.addEventListener('gesturestart', handleGestureStartForSafari);
 		target.addEventListener('gesturechange', handleGestureChangeForSafari);
 		target.addEventListener('gestureend', handleGestureEndForSafari);
+	}
+
+	// Fixing gesture jankyness on mobile Chrome
+	function handleTouchStartForMobileChrome(e) {
+		e.preventDefault()
+	}
+	function handleTouchMoveForMobileChrome(e) {
+		e.preventDefault()
+	}
+	function handleTouchEndForMobileChrome(e) {
+		e.preventDefault()
+	}
+	if (hasTouchEvents && navigator.vendor.match(/Google Inc/)) {
+		target.addEventListener('touchstart', handleTouchStartForMobileChrome);
+		target.addEventListener('touchmove', handleTouchMoveForMobileChrome);
+		target.addEventListener('touchend', handleTouchEndForMobileChrome);
 	}
 
 	//mobile pinch zoom
@@ -261,6 +276,11 @@ function panZoom (target, cb) {
 			target.removeEventListener('gesturestart', handleGestureStartForSafari);
 			target.removeEventListener('gesturechange', handleGestureChangeForSafari);
 			target.removeEventListener('gestureend', handleGestureEndForSafari);
+		}
+		if (hasTouchEvents && navigator.vendor.match(/Google Inc/)) {
+			target.removeEventListener('touchstart', handleTouchStartForMobileChrome);
+			target.removeEventListener('touchmove', handleTouchMoveForMobileChrome);
+			target.removeEventListener('touchend', handleTouchEndForMobileChrome);
 		}
 
 		pinch.disable()
