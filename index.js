@@ -196,36 +196,45 @@ function panZoom (target, cb) {
 	// Note that for mobile Safari we have to preventDefault the gesture events (we do that right above here)
 	var pinch = touchPinch(target)
 	var mult = 2
-	var initialCoords
+	var lastPinchCoords
 
-	pinch.on('start', function (curr) {
+	function getPinchCoords() {
 		var f1 = pinch.fingers[0];
 		var f2 = pinch.fingers[1];
 
-		initialCoords = [
+		return [
 			f2.position[0] * .5 + f1.position[0] * .5,
 			f2.position[1] * .5 + f1.position[1] * .5
-		]
+		];
+	}
 
+	pinch.on('start', function (curr) {
+		lastPinchCoords = getPinchCoords();
 		impetus && impetus.pause()
 	})
 	pinch.on('end', function () {
-		if (!initialCoords) return
+		if (!lastPinchCoords) return
 
-		initialCoords = null
-
+		lastPinchCoords = null
 		impetus && impetus.resume()
 	})
 	pinch.on('change', function (curr, prev) {
-		if (!pinch.pinching || !initialCoords) return
+		if (!pinch.pinching || !lastPinchCoords) return
+
+		var newCoords = getPinchCoords();
+		var dx = newCoords[0] - lastPinchCoords[0];
+		var dy = newCoords[1] - lastPinchCoords[1];
+
+		lastPinchCoords = newCoords;
+
 
 		schedule({
 			srcElement: target,
 			target: target,
 			type: 'touch',
-			dx: 0, dy: 0, dz: - (curr - prev) * mult,
-			x: initialCoords[0], y: initialCoords[1],
-			x0: initialCoords[0], y0: initialCoords[0]
+			dx: dx, dy: dy, dz: -(curr - prev) * mult,
+			x: newCoords[0], y: newCoords[1],
+			x0: newCoords[0], y0: newCoords[0]
 		})
 	})
 
