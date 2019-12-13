@@ -22,8 +22,9 @@ declare module "pan-zoom" {
     destroy: () => void;
     // Will cause the current pan to be stopped
     blockPan: () => void;
-    // If the current pan was blocked this resume it
-    unblockPan: () => void;
+    // If the current pan was blocked this resume it. If ignore is true, then
+    // the pan will not be handled but the next one will.
+    unblockPan: (ignore?: boolean) => void;
   }
 
   function PanZoomFunction(e: string | HTMLElement, callback: (event: PanZoomEvent) => void): PanZoomControl;
