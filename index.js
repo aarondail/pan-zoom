@@ -37,28 +37,15 @@ function panZoom (target, cb) {
 	var impetus
 
 	var initX = 0, initY = 0, init = true, srcElement
-	var ignoreCurrentPan = false
-	var initFn = function (e) { init = true, srcElement = e.srcElement, ignoreCurrentPan = false }
+	var initFn = function (e) { init = true, srcElement = e.srcElement }
 	target.addEventListener('mousedown', initFn)
 	target.addEventListener('touchstart', initFn, hasPassive ? { passive: true } : false)
-
-	function blockPan () {
-		ignoreCurrentPan = true
-	}
-	function unblockPan(ignore) {
-		ignoreCurrentPan = false
-		// !ignore
-		init = true
-	}
 
 
 	var lastY = 0, lastX = 0
 	impetus = new Impetus({
 		source: target,
 		update: function (x, y, ...args) {
-			if (ignoreCurrentPan) {
-				return;
-			}
 
 			if (init) {
 				init = false
@@ -66,7 +53,6 @@ function panZoom (target, cb) {
 				initY = touch.position[1]
 				lastX = x
 				lastY = y
-				// console.log({ initX, initY, lastX, lastY});
 			}
 
 			var e = {
@@ -296,6 +282,13 @@ function panZoom (target, cb) {
 
 		raf.cancel(frameId)
 	}
+	function blockPan () {
+		impetus && impetus.pause();
+	}
+	function unblockPan() {
+		impetus && impetus.resume();
+	}
+
 
 	return {
 		destroy,
