@@ -164,13 +164,19 @@ function panZoom (target, cb) {
 
 	// Fixing gesture jankyness on mobile Chrome
 	function handleTouchStartForMobileChrome(e) {
-		e.preventDefault()
+		if (e.touches.length === 2) {
+			e.preventDefault()
+		}
 	}
 	function handleTouchMoveForMobileChrome(e) {
-		e.preventDefault()
+		if (e.touches.length === 2) {
+			e.preventDefault()
+		}
 	}
 	function handleTouchEndForMobileChrome(e) {
-		e.preventDefault()
+		if (e.touches.length === 2) {
+			e.preventDefault()
+		}
 	}
 	if (hasTouchEvents && navigator.vendor.match(/Google Inc/)) {
 		target.addEventListener('touchstart', handleTouchStartForMobileChrome);
