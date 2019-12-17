@@ -282,17 +282,17 @@ function panZoom (target, cb) {
 
 		raf.cancel(frameId)
 	}
-	function blockPan () {
+	function pausePanning () {
 		impetus && impetus.pause();
 	}
-	function unblockPan() {
+	function resumePanning() {
 		impetus && impetus.resume();
 	}
 
 
 	return {
 		destroy,
-		blockPan,
-		unblockPan,
+		pausePanning,
+		resumePanning,
 	};
 }
