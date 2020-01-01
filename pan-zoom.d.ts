@@ -23,8 +23,11 @@ declare module "pan-zoom" {
     // Will pause all panning, even if a pan is on-going. The only exception is
     // two-finger panning on mobile. That is still allowed to occur.
     pausePanning: () => void;
-    // Will re-allow panning after a call to pausePanning.
-    resumePanning: (ignore?: boolean) => void;
+    // Will re-allow panning after a call to pausePanning. If there is an
+    // on-going pan gesture, it can be selectively ignored by passing true for
+    // `ignoreCurrent`. This will ignore any lingering momentum. The next pan
+    // gesture that starts will be handled normally.
+    resumePanning: (ignoreCurrent?: boolean) => void;
   }
 
   function PanZoomFunction(e: string | HTMLElement, callback: (event: PanZoomEvent) => void): PanZoomControl;

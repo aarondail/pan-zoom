@@ -37,15 +37,37 @@ function panZoom (target, cb) {
 	var impetus
 
 	var initX = 0, initY = 0, init = true, srcElement
-	var initFn = function (e) { init = true, srcElement = e.srcElement }
+	var ignorePan = false, resetIgnorePanOnNextInit = false
+	var initFn = function (e) {
+		init = true
+		srcElement = e.srcElement
+		if (resetIgnorePanOnNextInit) { 
+			ignorePan = false
+			resetIgnorePanOnNextInit = false
+		}
+ 	}
 	target.addEventListener('mousedown', initFn)
 	target.addEventListener('touchstart', initFn, hasPassive ? { passive: true } : false)
 
+	function pausePanning () {
+		ignorePan = true
+		resetIgnorePanOnNextInit = false
+	}
+	function resumePanning(ignoreCurrent) {
+		if (ignoreCurrent) {
+			resetIgnorePanOnNextInit = true
+		} else {
+			ignorePan = false
+		}
+	}
 
 	var lastY = 0, lastX = 0
 	impetus = new Impetus({
 		source: target,
 		update: function (x, y, ...args) {
+			if (ignorePan) {
+				return
+			}
 
 			if (init) {
 				init = false
@@ -287,12 +309,6 @@ function panZoom (target, cb) {
 		pinch.disable()
 
 		raf.cancel(frameId)
-	}
-	function pausePanning () {
-		impetus && impetus.pause();
-	}
-	function resumePanning() {
-		impetus && impetus.resume();
 	}
 
 
